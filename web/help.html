@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+          "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
+    <title>CppMem: an interactive C/C++ memory model explorer</title>
+  </head>
+  <body  style="font-family: verdana, arial, helvetica, sans-serif;">
+    <h2>CppMem: an interactive C/C++ memory model explorer</h2>
+    <p>CppMem is a tool to let one explore the behaviour of small concurrent test programs in the 
+relaxed memory model of the recent C11 and C++11
+revisions  of C and C++
+[<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3376.pdf">C++11 public draft N3376 (see 1.10, 29, 30)</a>],
+[<a href="http://www.open-std.org/JTC1/SC22/wg14/">WG14</a>] [<a href="http://www.open-std.org/jtc1/sc22/wg21/">WG21</a>], 
+<a href="http://www.hpl.hp.com/techreports/2008/HPL-2008-56.html">Boehm
+  and Adve, PLDI 2008</a>],  as formalised by <a href="http://www.cl.cam.ac.uk/~pes20/cpp/">Batty et al. [POPL 2011]</a>, which explains the model.
+ </p>
+
+
+
+<h3>Usage</h3> 
+<p>
+To start CppMem, simply <a href="index.html">click here</a>.  The
+basic usage is to select a model variant and test program, in the top
+left, and click <b>run</b>.  The tool then computes the set of all
+candidate executions of that program, and whether each of them is
+consistent and race-free according to the model.  You can then inspect
+the candidate executions one by one: for the current candidate, the
+tool shows its events and relations graphically in the bottom right,
+and shows the values of the model predicates for it in the top right.
+The <b>next candidate</b> and <b>previous candidate</b> buttons show
+the next or previous candidate, while the <b>next consistent</b>
+and <b>previous consistent</b> buttons skip to the next or previous
+consistent candidate.  To change the program or model variant, one
+has to first click <b>reset</b>.  To bring up this page, click <b>help</b>.
+</p><p>
+In the bottom left, the <b>Display Relations</b>, <b>Display Layout</b>, and <b>edit display options</b> let one fine-tune the graphical display.  
+
+Clicking on the model predicates in the top right brings up another tab or window with their <a href="http://www.cl.cam.ac.uk/~so294/lem/">Lem</a> definitions.  Individual predicates can be ignored by clicking on the attached tick boxes, changing the behaviour of the <b>next consistent</b> and <b>previous consistent</b> buttons.
+
+The current execution can be exported in various formats with the 
+<b>Files: out.exc</b>, <b>out.dot</b>, <b>out.dsp</b>, or <b>out.tex</b> links. 
+</p>
+
+<h3>Model</h3>
+<p>
+CppMem supports the following versions of the C/C++11 model. 
+<ul> 
+<li><a href="cmm.html#standard"><b>standard</b></a> 
+This is the memory model described by the 2011 C++11 standard. The
+mathematical definitions were constructed in discussion with the
+standardisation comittee, and there is a close correspondence between
+them and the standard text.
+This is essentially the same as the model described in our 
+<a href="http://www.cl.cam.ac.uk/~pes20/cpp/">POPL 2011 paper</a>, but
+with some light refactoring and improved lock and RMW semantics, as in
+our <a href="http://www.cl.cam.ac.uk/~pes20/cppppc-supplemental/pldi010-sarkar.pdf">PLDI 2012 paper</a>.
+
+</li>
+<li><a href="cmm.html#preferred"><b>preferred</b></a> (or no_vsse).
+This is a simplified variant of the standard
+model, that should be equivalent to it. 
+It removes the complicated notion of visible sequences of side effects
+  (VSSEs), whose force is
+covered by the coherence requirements.  For those looking to work with
+general C or C++ concurrency, this is the preferred model.
+</li>
+<!--<li><a href="cmm.html#separate_lo"><b>separate_lo</b></a>
+This is a variant of the preferred model with a separate lock --
+  --order.</li>
+-->
+<!-- <li><a href="cmm.html#multi_lo"><b>multi_lo</b></a>
+This is another equivalent model uses per-location lock orders rather
+     than a shared one. </li>
+-->
+<li><a href="cmm.html#tot"><b>tot</b></a>
+This is a simpler model, for programs without consumes, relaxed,
+  acquires or releases, that should be equivalent to the others for
+  those. It has a single total order over all memory accesses.
+</li>
+</ul>
+</p>
+
+<h3>Program</h3>
+<p>
+Test programs can be selected from a drop-down menu or typed directly into the window.  
+They can be written in a small fragment of C/C++ including some of the C11/C++11 concurrency primitives.  It also supports three non-standard extensions for writing concise tests: a parallel composition, written <code>{{{ ... ||| ... }}}</code>;  constraints on read values such as <code>x.readsvalue(1)</code>, which restricts attention to candidate executions in which that read of <code>x</code> reads the value <code>1</code>; and
+dummy "thread-local" targets for reads, 
+where we suppress the normal write events for variables starting with "r", e.g. in <code>r1=x</code> or  <code>r2=x.load(memory_order_relaxed)</code>.
+The tool calculates the set of <em>all</em> possible candidate executions for the test program, 
+so tests should be relatively small and terminating. For some examples the interface will be unresponsive while it computes.
+</p>
+<p>
+Instead of a program, one can also enter an execution (an <code>.exc</code> file), which directly specifies the actions and relations of some candidate execution of interest.
+</p>
+
+
+<h3>Display</h3>
+<h4>Display Relations</h4>
+<p> 
+The models use various binary relations over memory read, write, read-modify-write, lock, unlock, and fence actions.  
+Clicking on these check boxes determines whether they are displayed in the graph, but does not affect the model. 
+The first relations are determined by a choice of control-flow path for each thread, and the tool enumerates all possible alternatives using a thread-local semantics for the fragment of C/C++ supported.
+<ul>
+<li> <b>sb</b>   sequenced-before relation</li>
+<li> <b>asw</b>  additional-synchronises-with  </li>
+<li> <b>dd</b>   data-dependency  </li>
+<li> <b>cd</b>   control-dependency </li>
+</ul>
+Next we have several relations that are existentially quantified: for each choice of control-flow paths, the tool enumerates all possible alternatives of the following: 
+<ul>
+<li> <b>rf</b> The reads-from relation, from writes to all the reads that read from them </li>
+<li> <b>tot</b>  The total order of the <code>tot</code> model </li>
+<li> <b>mo</b>  The modification order (or coherence order) over writes to atomic locations, total per location </li>
+<li> <b>sc</b>  A total order over the sequentially consistent atomic actions </li>
+<li> <b>lo</b>  The lock order </li>
+</ul>
+Finally there are derived relations, calculated by the model from the relations above:
+<ul>
+<li> <b>hb</b>  happens-before </li>
+<li> <b>vse</b>  visible side effects </li>
+<li> <b>vsses</b>  visible sequences of side effects </li>
+<li> <b>ithb</b>  inter-thread happens-before </li>
+<li> <b>dob</b>  dependency-ordered-before </li>
+<li> <b>cad</b>  carries-a-dependency-to </li>
+<li> <b>sw</b>  synchronises-with </li>
+<li> <b>hrs</b>  hypothetical release sequence </li>
+<li> <b>rs</b>  release sequence </li>
+<li> <b>data_races</b>  inter-thread data races </li>
+<li> <b>unsequenced_races</b> intra-thread unsequenced races, unrelated by sb  </li>
+</ul>
+
+</p>
+<h4>Display Layout</h4>
+<p>
+There are several graph layout choices available: <b>dot</b>, <b>neato_par</b>, <b>neato_par_init</b>, and <b>neato_downwards</b>.
+</p>
+<p>
+It is also possible to output the graph with tex labels. 
+</p>
+<h4>Display Options</h4>
+<p>
+This lets one tune a variety of other display parameters, for font size, etc.
+</p>
+
+<!--
+<h3>Model Predicates</h3>
+<p>
+[TODO]
+</p>
+-->
+
+<h3>About</h3>
+CppMem exists in web-interface and command-line versions.
+It is written in OCaml; the web-interface version uses js_of_ocaml to compile into JavaScript, with most of the computation running in the browser but graph layout on a server.  The model definitions are written in <a href="http://www.cl.cam.ac.uk/~so294/lem/">Lem</a> and compiled from that to OCaml code. 
+
+<h3>Download</h3>
+<p>
+<ul><li><a href="cppmem.tar.gz">tarball</a></li>
+<li><a href="revision.txt">revision history</a></li></ul>
+</p>
+
+
+<h3>People</h3>
+<ul>
+<li>  <a href="http://www.cl.cam.ac.uk/~mjb220">Mark Batty</a></li>
+<li>  <a href="http://www.cl.cam.ac.uk/~so294">Scott Owens</a></li>
+<li>  <a href="http://www.cl.cam.ac.uk/"></a>Jean Pichon</li>
+<li>  <a href="http://www.cl.cam.ac.uk/~ss726">Susmit Sarkar</a></li>
+<li>  <a href="http://www.cl.cam.ac.uk/~pes20">Peter Sewell</a></li>
+<!--<li>  <a href="http://www.cl.cam.ac.uk/~tw333">Tjark Weber</a></li>-->
+</ul>
+
+<!--
+<img src="mark.med.jpg"   height="120"  alt="[Mark]"></img>
+<img src="scott.med.jpg"  height="120"  alt="[Scott]"></img>
+<img src="susmit.med.jpg" height="120"  alt="[Susmit]"></img>
+<img src="peter.med2.jpg" height="120"  alt="[Peter]"></img>
+<img src="tjark.med.jpg"  height="120"  alt="[Tjark]"></img>
+-->
+
+
+`
+
+
+ </body>
+</html>

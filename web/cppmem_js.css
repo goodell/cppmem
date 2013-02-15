@@ -1,0 +1,124 @@
+/* style for the cppmem tool */
+
+.good {
+    color: #00ff00;
+}
+
+.error {
+    color: #ff0000;
+}
+
+.warning {
+    color: #888800;
+}
+
+.normal {
+    color: #000000;
+}
+
+.formatted {
+    white-space: pre;
+    font-family: monospace;
+}
+
+.result {
+    font-weight: bold;
+}
+
+#predicates_p {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+#program {
+    display: block;
+}
+
+#prog_div {
+    float: left;
+}
+
+#goto_label {
+    width: 2em;
+}
+
+#help {
+    position: absolute;
+    top: 0;
+    right: 1em;
+}
+
+#layout_div {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+#config_div {
+    clear: left;
+    float: left;
+}
+
+#exec_div {
+    float: left;
+    margin-left: 1em;
+}
+
+#exports {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+#execution_info {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+#program_info {
+    margin-left: 1em;
+    text-align: right;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+#input_type_div {
+    display: block;
+}
+
+h1, h2, h3 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+#model_div h2, #predicates_div h3 {
+    margin-top: 0.25em;
+}
+
+.valid {
+    color: #008800;
+}
+
+.invalid {
+    color: #ff0000;
+}
+
+#td_bot_left, #td_top_left, #td_top_right, #td_bot_right {
+    vertical-align: top;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.disabled {
+    color: #888888;
+}
+
+/* to prevent jitter, show it, but invisible */
+.invisible {
+    color: #ffffff;
+}

@@ -1,0 +1,52 @@
+CppMem installation instructions
+
+= From Tar Archive =
+
+Dependencies:
+- make
+- OCaml 3.12
+- ocamlbuild
+- findlib (http://projects.camlcity.org/projects/findlib.html)
+- Lwt (http://ocsigen.org/lwt/)
+
+
+To make the command-line tool "cppmem":
+  make all
+
+To make and install the web interface, on a machine running a web server:
+  
+1) Edit cgi/dot.ml to fix the path to the graphviz dot and neato tools
+2) make all install-web
+
+(this installs in ~/public_html; edit WEBROOTDIR in Makefile to change that)
+
+
+
+The web interface requires a web server configured to serve
+~/public_html and run ~/public_html/cppmem/dot.cgi as a CGI script.
+
+A sample server configuration, to install lighttpd on a new Ubuntu 12.04.1
+machine, involved:
+
+sudo apt-get install emacs23
+sudo apt-get install graphviz
+sudo apt-get install lighttpd
+sudo apt-get install ocaml-nox
+sudo apt-get install make
+sudo apt-get install ocaml-findlib
+sudo apt-get install liblwt-ocaml
+sudo apt-get install liblwt-ocaml-dev
+
+followed by copying the lighttpd.conf from the tarball to /etc/lighttpd
+
+
+cd cppmem
+mkdir ~/public_html
+#edit dot.ml as above, e.g.
+  sed -i 's/\/local//' cgi/dot.ml 
+make all install-web
+sudo rm -rf /var/www/cppmem
+sudo mv ~/public_html/cppmem /var/www/cppmem
+
+
+

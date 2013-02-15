@@ -1,0 +1,18 @@
+% CoWW: coherence for two writes to the same address
+%  happens-before (hb) and modification order (mo) must
+%  be consistent, so this execution is forbidden
+
+% The actions:
+a;0:WRLX x=1
+b;1:WRLX x=2
+
+% Relation sb: EMPTY
+% Relation asw:EMPTY
+% Relation dd: EMPTY
+% Relation cd: EMPTY
+% Relation rf: EMPTY
+% Relation sc: EMPTY
+% Relation mo:
+mo: b --> a
+% Relation hb:
+hb: a --> b

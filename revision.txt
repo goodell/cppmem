@@ -1,0 +1,7 @@
+CppMem revision history
+
+1.0a Thu Nov 8 BST 2012
+Added a release-acquire model.
+
+1.0   Fri Aug 31 BST 2012
+    first public release

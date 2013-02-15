@@ -1,0 +1,298 @@
+Priorities
+==========
+
+- use short names for primitives
+- share string constants
+  =====> generic mechanism for sharing constants?
+
+- optimize pattern (new Mlstring("foo").toString())
+                 ===> "foo" converted to UTF-8
+- new MlString(x) replaced by primitive
+
+- unhoist functions when possible
+
+---------
+
+-  stopPropagation: function(){
+         if (this.event.stopPropagation) this.event.stopPropagation();
+         else this.event.cancelBubble = true;
+         return this; }
+- check canvas availability in examples
+- website: menus + doc
+- finish planet (no cpu when not moving / not visible)
+
+Examples
+--------
+- polishing
+
+Libraries
+---------
+- object literals
+    {:m = 1; n = "abcd":} : [> `m of int; `n of string] Js.record Js.t
+  ==> usual rule for mapping field names; check for no duplicate.
+- array literals
+  in particular, heterogeneous arrays...
+        ('a, 'b, 'c) t ???
+
+    module Tuple : sig
+      type 'a tuple
+      val e : unit tuple
+      val a : 'a tuple -> 'b -> ('a * 'b) tuple
+
+      type ('a, 'b) acc
+      val first : ('a * 'b, 'b) acc
+      val next : ('a, 'b) acc -> ('c * 'a, 'b) acc
+      val get : 'a tuple -> ('a, 'b) acc -> 'b
+      val set : 'a tuple -> ('a, 'b) acc -> 'b -> unit
+    end = struct
+      type 'a tuple = 'a
+      let e = ()
+      let a x y = (x, y)
+    end
+
+   <_0: t0; _1: t1; _n: tn> t
+
+Libraries
+=========
+- DOMContentLoaded (+workarounds for legacy browsers)
+  ===> see jquery
+- Add expm1, log1p
+  ===> log(1+x) == (log(1+x) * x) / ((1-x) - 1)
+       (may be misoptimized...)
+
+Benchmarks/examples
+===================
+- take examples from http://shootout.alioth.debian.org/?
+- planets (+satellites?) ===> Runge-Kutta
+- 3D effects: http://gyu.que.jp/jscloth/
+              http://stackoverflow.com/questions/1584854/how-to-draw-3d-sphere
+
+Known issues
+============
+- mutually recursive functions in a loop are not correctly compiled:
+  should build a shared closure
+
+Compiler optimizations
+======================
+- "unsafe" option: no check for division by zero / array access
+- per module options: we could apply "unsafe" and "inline" options
+  selectively
+
+- fix control.ml
+
+- detect caml_format_int("%d", x) and generate ""+x
+
+- syntactic sugar for Javascript literal strings
+  + optimization to avoid going through Caml strings
+
+- turn partial applications into closures?
+    x = app(f, x) ====>
+    x = fun(x1,...,xn) {return f(x, x1, ...,xn);}
+
+- Can we avoid spurious conversions from boolean to integers???
+  ===> explicit conversion to boolean; specialized "if" that operates
+       on booleans directly
+
+- inlining (especially of functions that are used only once!)
+- constant hoisting (including functions, out of loops and functions)
+- inline also partially applied functions
+
+- implement variable coalescing (in code generation, reuse the same
+  name for several variables when they have a disting lifetime)
+
+- we should check stack compatibility when parsing:
+  when jumping somewhere, the stack should keep the same shape
+
+- Improved optimizations
+  ==> cross-function optimizations
+  ==> deadcode elimination inside blocks
+  (for instance, elimination of function which are defined in a
+   functor but are not used)
+
+==========================
+==========================
+
+Special case for shortcut boolean operations...
+
+     1
+     |\
+     | \2
+     | /\
+     |/  \
+     3    4
+
+==========================
+
+MD5
+===
+http://www.myersdaily.org/joseph/javascript/md5-speed-test.html
+http://code.google.com/p/crypto-js/source/browse/trunk/src/Crypto.js
+http://bitwiseshiftleft.github.com/sjcl/
+
+Float <-> hex
+=============
+http://babbage.cs.qc.edu/IEEE-754/js/IEEE-754.js
+http://snippets.dzone.com/posts/show/685
+http://jsfromhell.com/classes/binary-parser
+
+Filling a string
+================
+  function stringFill3(x, n) {
+    var s = '';
+    for (;;) {
+      if (n & 1) s += x;
+      n >>= 1;
+      if (n) x += x;
+      else break;
+    }
+    return s;
+  }
+
+Conversion string <-> array
+===========================
+  http://code.google.com/p/crypto-js/source/browse/trunk/src/Crypto.js
+
+
+Byte array ==> string
+=====================
+int array --map--> string array --join--> string
+   b[i] = toString[a[i]]  where toString is a precomputed array of strings
+
+Bigint
+======
+http://www.leemon.com/crypto/BigInt.js
+
+==========================
+
+BUGS
+====
+- ISINT is compiled to "not a block"; document this deviation
+  (or document that we should not rely on the Obj module)
+
+- fix definitions of max_int and min_int in pervasive...
+  (not sure how...)
+
+PERFORMANCE
+===========
+- should we rebind variables from a deeper level ?
+  (only if used more than once...)
+
+     var x = ...
+     function () {
+        var y = x;
+        ... y .... y ... y ....
+     }
+
+COMPACT MODE
+============
+- We need to insert newlines from time to time to avoid problems with
+  some routers...
+- Code for variable renaming in Javascript code
+  ==> also eliminate redundant "var"?
+- Start with function parameters.  Then, variables that are used most.
+- Use interference mechanism...
+
+IMPROVEMENTS
+============
+
+- be more cautious regarding how we print floats...
+  (is it accurate?)
+  ==> gdtoa
+    http://caml.inria.fr/pub/ml-archives/caml-list/2002/12/2813f8e8be115b0bad1bc16b1e41b744.en.html
+
+- We only have to make sure we do not use a
+  reserved word nor a function used outside for naming variables
+
+- explicit conversion from int to boolean
+
+- simplify conditional definition
+  should be:
+     Cond of Var.t * cont * cont
+  (we need to eliminate unnecessary conversions from bool to integer
+   for that)
+
+NEW FEATURES
+============
+
+- Map Caml objects to Javascript objects
+  ==> remap CamlinternalOO module
+
+- dynamic linking? (code generation from cmo files)
+
+- Can we use the debugger information to generate specialized code?
+  (Use objects rather than arrays for tuples, ...)
+
+DATA REPRESENTATION
+===================
+- should wrap Ocaml exceptions (more robust code)...
+  ==> use Error object as base object, special "message" method
+
+DATA ANALYSIS
+=============
+- interprocedural analysis
+
+COMPRESSION OPTIMIZATION
+========================
+- http://timepedia.blogspot.com/2009/08/on-reducing-size-of-compressed.html
+  http://timepedia.blogspot.com/2009/11/traveling-salesman-problem-and.html
+  ==> order functions by similarity
+  ==> try to always use the same arguments for functions
+  ==> 7-zip is better at compressing than gzip, with the same algorithm...
+- we can remove some whitespaces but we have to look at the context...
+
+DOCUMENTATION
+=============
+document as much as we can:
+* the representation of datas, closures, ...
+* the assumption we make regarding the bytecode
+  ==> ISINT
+
+================================
+
+REFERENCES
+==========
+
+http://blog.higher-order.net/2009/09/08/understanding-clojures-persistenthashmap-deftwice/
+
+http://code.google.com/closure/compiler/
+
+http://code.google.com/p/ocamljs/source/browse/#svn/trunk/src
+
+Inlining: see Manuel Serrano's paper
+
+Resolving and Exploiting the k-CFA Paradox
+Illuminating Functional vs. Object-Oriented Program Analysis
+Matthew Might               Yannis Smaragdakis             David Van Horn
+
+==================================
+
+Use window.postMessage instead of setTimeout for yield (setTimeout
+always waits a bit!)
+==> but window.postMessage is synchronous in IE8
+    + does not cooperate well with other users of message events
+
+==================================
+
+Could we generate ocaml bytecode as well? (bytecode optimizer)
+LLVM code?
+
+Targeting JAVA / .net seem harder: not type information...
+
+==================================
+
+http://www.pps.jussieu.fr/~montela/ocamil/
+Note that the OCamIL compilers and tools are currently based on OCaml
+v3.06. An upgrade to the latest OCaml version is scheduled for the
+next release.
+[Never happened...]
+
+ocamldefun (on ocaml_beginners)
+I'd really like to play around ocamldefun, but it seems to only work
+with ocaml 3.06. Has anyone had luck setting this up in more recent
+versions of ocaml?
+
+OCamlexc (on caml list)
+So I was wondering if there is any current or recent projects (or interests) 
+to resume OCamlExc development and complete the set of handled constructs,
+as I'm afraid I'll have neither the time nor the skills to do the job. 
+

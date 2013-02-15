@@ -1,0 +1,6 @@
+<*.cmo>     : debug
+<*.byte>    : debug
+<**/*.{byte,native,d.byte,ml,mli}> : use_unix
+<cil-parser> : include
+<main_js.ml> or "main_js.d.byte" : package(js_of_ocaml), package(js_of_ocaml.syntax), syntax(camlp4o)
+<cgi/dot.{ml,d.byte}> : use_unix, use_str
